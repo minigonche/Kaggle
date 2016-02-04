@@ -1,22 +1,28 @@
+import sys
 #Data manipulation library
 import pandas
-# Import the linear regression class
-from sklearn.linear_model import LinearRegression
 # Sklearn also has a helper that makes it easy to do cross validation
-from sklearn.cross_validation import KFold
+from sklearn.ensemble import RandomForestClassifier
+from sklearn import cross_validation
 
-#Loads teh data
+
+#Loads the training data
 titanic = pandas.read_csv("data/train.csv")
 
-print(titanic.describe())
+#Loads the testing data
+titanic_test = pandas.read_csv("data/test.csv")
+
 
 #------- Data cleaning ---------
+# Training
 #--- Age
 titanic["Age"] = titanic["Age"].fillna(titanic["Age"].median())
 
 #--- Sex
 titanic.loc[titanic["Sex"] == "male", "Sex"] = 0
 titanic.loc[titanic["Sex"] == "female", "Sex"] = 1
+titanic["Sex"] = titanic["Sex"].fillna(0)
+
 
 #--- Embarked
 titanic["Embarked"] = titanic["Embarked"].fillna("S")
@@ -24,4 +30,62 @@ titanic.loc[titanic["Embarked"] == "S", "Embarked"] = 0
 titanic.loc[titanic["Embarked"] == "C", "Embarked"] = 1
 titanic.loc[titanic["Embarked"] == "Q", "Embarked"] = 2
 
-#------ Evaluar el algoritmo
+
+
+#Testing 
+#---- Pclass
+titanic_test["Pclass"] = titanic_test["Pclass"].fillna(titanic["Pclass"].median())
+
+#---- SibSp
+titanic_test["SibSp"] = titanic_test["SibSp"].fillna(titanic["SibSp"].median())
+
+#---- Parch
+titanic_test["Parch"] = titanic_test["Parch"].fillna(titanic["Parch"].median())
+
+#--- Age
+titanic_test["Age"] = titanic_test["Age"].fillna(titanic["Age"].median())
+
+#---- Sex 
+titanic_test.loc[titanic_test["Sex"] == "male", "Sex"] = 0
+titanic_test.loc[titanic_test["Sex"] == "female", "Sex"] = 1
+titanic_test["Sex"] = titanic_test["Sex"].fillna(0)
+
+
+#---- Embarked
+titanic_test["Embarked"] = titanic_test["Embarked"].fillna("S")
+
+titanic_test.loc[titanic_test["Embarked"] == "S", "Embarked"] = 0
+titanic_test.loc[titanic_test["Embarked"] == "C", "Embarked"] = 1
+titanic_test.loc[titanic_test["Embarked"] == "Q", "Embarked"] = 2
+
+#---- Fare 
+titanic_test["Fare"] = titanic_test["Fare"].fillna(titanic["Fare"].median())
+
+#print(titanic.describe())
+#print(titanic_test.describe())
+
+#sys.exit()
+
+#------ Creates the algorithm
+#predictors
+predictors = ["Pclass", "Sex", "Age", "SibSp", "Parch", "Fare", "Embarked"]
+#predictors = [ "Sex", "Age"]
+
+
+# Initialize the algorithm class
+alg = RandomForestClassifier(random_state=1, n_estimators=10, min_samples_split=2, min_samples_leaf=1)
+
+# Train the algorithm using all the training data
+alg.fit(titanic[predictors], titanic["Survived"])
+
+# Make predictions using the test set.
+predictions = alg.predict(titanic_test[predictors])
+
+# Create a new dataframe with only the columns Kaggle wants from the dataset.
+submission = pandas.DataFrame({
+        "PassengerId": titanic_test["PassengerId"],
+        "Survived": predictions
+    })
+
+#Prints the submission    
+submission.to_csv("submission.csv", index=False)    
