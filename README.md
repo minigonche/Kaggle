@@ -1,1 +1,1 @@
-# Kaggle
+# My Kaggle projects and submissions
