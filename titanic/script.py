@@ -33,6 +33,10 @@ titanic.loc[titanic["Embarked"] == "Q", "Embarked"] = 2
 
 
 #Testing 
+
+#---- PassengerId 
+titanic_test["PassengerId"] = titanic_test["PassengerId"].fillna(0)
+
 #---- Pclass
 titanic_test["Pclass"] = titanic_test["Pclass"].fillna(titanic["Pclass"].median())
 
@@ -66,6 +70,9 @@ titanic_test["Fare"] = titanic_test["Fare"].fillna(titanic["Fare"].median())
 
 #sys.exit()
 
+
+
+
 #------ Creates the algorithm
 #predictors
 predictors = ["Pclass", "Sex", "Age", "SibSp", "Parch", "Fare", "Embarked"]
@@ -86,6 +93,8 @@ submission = pandas.DataFrame({
         "PassengerId": titanic_test["PassengerId"],
         "Survived": predictions
     })
+    
+submission.PassengerId = submission.PassengerId.astype(int)
 
 #Prints the submission    
 submission.to_csv("submission.csv", index=False)    
