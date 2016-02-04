@@ -23,3 +23,5 @@ titanic["Embarked"] = titanic["Embarked"].fillna("S")
 titanic.loc[titanic["Embarked"] == "S", "Embarked"] = 0
 titanic.loc[titanic["Embarked"] == "C", "Embarked"] = 1
 titanic.loc[titanic["Embarked"] == "Q", "Embarked"] = 2
+
+#------ Evaluar el algoritmo
