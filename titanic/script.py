@@ -1,4 +1,5 @@
 import sys
+import numpy as np
 #Data manipulation library
 import pandas
 # Sklearn also has a helper that makes it easy to do cross validation
@@ -32,6 +33,10 @@ titanic.loc[titanic["Embarked"] == "Q", "Embarked"] = 2
 
 #Testing 
 
+#Removes the rows with no PassengerId
+titanic_test = titanic_test[np.isfinite(titanic_test["PassengerId"])]
+
+
 #---- PassengerId 
 titanic_test["PassengerId"] = titanic_test["PassengerId"].fillna(0)
 
@@ -62,6 +67,8 @@ titanic_test.loc[titanic_test["Embarked"] == "Q", "Embarked"] = 2
 #---- Fare 
 titanic_test["Fare"] = titanic_test["Fare"].fillna(titanic["Fare"].median())
 
+
+
 # ----- Data enhancement --------
 
 # Generating a familysize column
@@ -72,26 +79,21 @@ titanic_test["FamilySize"] = titanic_test["SibSp"] + titanic_test["Parch"]
 titanic["NameLength"] = titanic["Name"].apply(lambda x: len(x))
 titanic_test["NameLength"] = titanic_test["Name"].apply(lambda x: len(x))
 
-
-
 #print(titanic.describe())
 #print(titanic_test.describe())
-
 #sys.exit()
-
-
 
 
 #------ Creates the algorithm
 #predictors
-predictors = ["Pclass", "Sex", "Age", "SibSp", "Parch", "Fare", "Embarked"]
+predictors = ["Pclass", "Sex", "Age", "SibSp", "Parch", "Fare", "Embarked", "FamilySize", "NameLength"]
 #predictors = [ "Sex", "Age"]
 
 
 # Initialize the algorithm class
 alg = RandomForestClassifier(random_state=1, n_estimators=10, min_samples_split=2, min_samples_leaf=1)
 
-#Calculates the scores for the training dataframe
+#Calculates the scores for the training dataframe and pronts it
 scores = cross_validation.cross_val_score(alg, titanic[predictors], titanic["Survived"], cv=3)
 print(scores.mean())
 
@@ -113,3 +115,6 @@ submission.PassengerId = submission.PassengerId.astype(int)
 
 #Prints the submission    
 submission.to_csv("submission.csv", index=False)    
+
+
+
