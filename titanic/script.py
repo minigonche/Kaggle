@@ -23,13 +23,11 @@ titanic.loc[titanic["Sex"] == "male", "Sex"] = 0
 titanic.loc[titanic["Sex"] == "female", "Sex"] = 1
 titanic["Sex"] = titanic["Sex"].fillna(0)
 
-
 #--- Embarked
 titanic["Embarked"] = titanic["Embarked"].fillna("S")
 titanic.loc[titanic["Embarked"] == "S", "Embarked"] = 0
 titanic.loc[titanic["Embarked"] == "C", "Embarked"] = 1
 titanic.loc[titanic["Embarked"] == "Q", "Embarked"] = 2
-
 
 
 #Testing 
@@ -57,13 +55,24 @@ titanic_test["Sex"] = titanic_test["Sex"].fillna(0)
 
 #---- Embarked
 titanic_test["Embarked"] = titanic_test["Embarked"].fillna("S")
-
 titanic_test.loc[titanic_test["Embarked"] == "S", "Embarked"] = 0
 titanic_test.loc[titanic_test["Embarked"] == "C", "Embarked"] = 1
 titanic_test.loc[titanic_test["Embarked"] == "Q", "Embarked"] = 2
 
 #---- Fare 
 titanic_test["Fare"] = titanic_test["Fare"].fillna(titanic["Fare"].median())
+
+# ----- Data enhancement --------
+
+# Generating a familysize column
+titanic["FamilySize"] = titanic["SibSp"] + titanic["Parch"]
+titanic_test["FamilySize"] = titanic_test["SibSp"] + titanic_test["Parch"]
+
+# The .apply method generates a new series
+titanic["NameLength"] = titanic["Name"].apply(lambda x: len(x))
+titanic_test["NameLength"] = titanic_test["Name"].apply(lambda x: len(x))
+
+
 
 #print(titanic.describe())
 #print(titanic_test.describe())
@@ -82,11 +91,17 @@ predictors = ["Pclass", "Sex", "Age", "SibSp", "Parch", "Fare", "Embarked"]
 # Initialize the algorithm class
 alg = RandomForestClassifier(random_state=1, n_estimators=10, min_samples_split=2, min_samples_leaf=1)
 
+#Calculates the scores for the training dataframe
+scores = cross_validation.cross_val_score(alg, titanic[predictors], titanic["Survived"], cv=3)
+print(scores.mean())
+
 # Train the algorithm using all the training data
 alg.fit(titanic[predictors], titanic["Survived"])
 
 # Make predictions using the test set.
 predictions = alg.predict(titanic_test[predictors])
+
+
 
 # Create a new dataframe with only the columns Kaggle wants from the dataset.
 submission = pandas.DataFrame({
